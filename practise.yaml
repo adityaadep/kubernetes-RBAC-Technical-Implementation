@@ -1,0 +1,105 @@
+apiVersion : apps/v1
+kind: ServiceAccount
+metadata:
+  name: admin-sa
+  namespace: default
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: admin-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin-role
+subjects:
+  - kind: ServiceAccount
+    name: admin-sa
+    namespace: default
+
+---
+
+apiVersion: apps/v1
+kind: ServiceAccount
+metadata:
+  name: general-sa
+  namespace: default
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: general-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods","services","namespaces","endpoints"]
+    verbs: ["get","list","watch"]
+  - apiGroups: ["apps","extensions"]
+    resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
+    verbs: ["get","list","watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs","cronjobs"]
+    verbs: ["get","list","watch"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: general-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  name: general-role
+  kind: ClusterRole
+subjects:
+  kind: ServiceAccount
+  name: general-sa
+  namespace: default
+
+---
+
+apiVersion: apps/v1
+kind: ServiceAccount
+metadata:
+  name: others-sa
+  namespace: default
+
+---
+
+apiVersion: rbac.authorization.k8s.io
+kind: ClusterRole
+metadata:
+  name: others-role
+roles:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["list","watch","get"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: others-rolebinding
+roleRef:
+  - name: others-role
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+subjects:
+  name: others-sa
+  kind: ServiceAccount
+  namespace: default
+
